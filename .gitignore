@@ -1,0 +1,3 @@
+test
+.env
+mariadb_vol/
