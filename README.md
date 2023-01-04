@@ -9,7 +9,7 @@ Google Cloud offers an '[always free](https://cloud.google.com/free/)' tier of t
 Go to [Google Compute Engine](https://cloud.google.com/compute) and open a Cloud Shell. You may also create the instance manually following [the constraints of the free tier](https://cloud.google.com/free/docs/gcp-free-tier). In the Cloud Shell enter the following command to build the properly spec'd machine: 
 
 ```bash
-$ gcloud compute instances create vaultwarden \
+gcloud compute instances create vaultwarden \
     --machine-type e2-micro \
     --zone us-central1-a \
     --image-project cos-cloud \
@@ -23,16 +23,21 @@ $ gcloud compute instances create vaultwarden \
 Enter a shell on the new instance and clone this repo:
 
 ```bash
-$ git clone https://github.com/abdulaziz-git/vaultwarden-cloudflare-zero-trust.git
-$ cd vaultwarden-cloudflare-zero-trust
+git clone https://github.com/abdulaziz-git/vaultwarden-cloudflare-zero-trust.git
+cd vaultwarden-cloudflare-zero-trust
 ```
 
 Set up the docker-compose alias by using the included script:
 
 ```bash
-$ sh utilities/install-alias.sh
-$ source ~/.bashrc
-$ docker-compose version
+sh utilities/install-alias.sh
+source ~/.bashrc
+docker-compose version
+```
+
+You should get reply similar to the following
+
+```bash
 docker-compose version 1.26.2, build eefe0d3
 docker-py version: 4.2.2
 CPython version: 3.7.7
@@ -54,7 +59,7 @@ After that create a tunnel in Zero Trust dashboard, copy tunnel tokens and add t
 To start up, use `docker-compose`:
 
 ```bash
-$ docker-compose up -d
+docker-compose up -d
 ```
 
 After that go back to Cloudflare Zero Trust tunnel page.
@@ -64,3 +69,21 @@ After that go back to Cloudflare Zero Trust tunnel page.
 - Set Service Type to `HTTP`
 - Set URL to `proxy:80`
 - Click `Save hostname`
+
+## Step 4: Configure rclone for automatic backup
+
+Run the following command to install rclone
+
+```bash
+docker exec -it vaultwarden ash /backup.sh
+```
+
+Run the following command to configure rclone
+```bash
+docker exec -it vaultwarden ash -c 'rclone config --config $BACKUP_RCLONE_CONF'
+```
+
+Follow the prompts and instructions at https://rclone.org/remote_setup/ - you will most likely need to download a rclone on another computer (it is portable) to authorize.
+
+# Thanks to
+https://github.com/dadatuputi/bitwarden_gcloud

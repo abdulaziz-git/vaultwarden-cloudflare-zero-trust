@@ -26,7 +26,9 @@ rclone_init() {
 # with the addition of backing up:
 # * attachments directory
 # * sends directory
+# * icon_cache directory
 # * config.json
+# * rclone.conf
 # * rsa_key* files
 make_backup() {
   # use sqlite3 to create backup (avoids corruption if db write in progress)
@@ -41,12 +43,14 @@ make_backup() {
   FILES=""
   FILES="$FILES $([ -d attachments ] && echo attachments)"
   FILES="$FILES $([ -d sends ] && echo sends)"
-  FILES="$FILES $([ -f config.json ] && echo sends)"
+  FILES="$FILES $([ -d icon_cache ] && echo icon_cache)"
+  FILES="$FILES $([ -f config.json ] && echo config*)"
+  FILES="$FILES $([ -f rclone.conf ] && echo rclone*)"
   FILES="$FILES $([ -f rsa_key.der -o -f rsa_key.pem -o -f rsa_key.pub.der ] && echo rsa_key*)"
 
   # tar up files and encrypt with openssl and encryption key
   BACKUP_DIR=$DATA/backups
-  BACKUP_FILE=$BACKUP_DIR/"bw_backup_$(date "+%F-%H%M%S").tar.gz"
+  BACKUP_FILE=$BACKUP_DIR/"vaultwarden_backup_$(date "+%F-%H%M%S").tar.gz"
 
   # If a password is provided, run it through openssl
   if [ -n "$BACKUP_ENCRYPTION_KEY" ]; then
@@ -69,21 +73,20 @@ make_backup() {
 
 ##############################################################################################
 
-# Initialize rclone if BACKUP=rclone and $(which rclone) is blank
-if [ "$1" == "rclone" -a -z "$(which rclone)" ]; then
+# Initialize rclone and if $(which rclone) is blank
+if [ -z "$(which rclone)" ]; then
   rclone_init
 fi 
 
 # Handle rclone Backup
-elif [ "$1" == "rclone" ]; then
-  printf "Running rclone backup\n" > $LOG
+printf "Running rclone backup\n" > $LOG
   
-  # Only run if $BACKUP_RCLONE_CONF has been setup
-  if [ -s "$BACKUP_RCLONE_CONF" ]; then
-    RESULT=$(make_backup)
+# Only run if $BACKUP_RCLONE_CONF has been setup
+if [ -s "$BACKUP_RCLONE_CONF" ]; then
+  RESULT=$(make_backup)
 
-    # Sync with rclone
-    REMOTE=$(rclone --config $BACKUP_RCLONE_CONF listremotes | head -n 1)
-    rclone --config $BACKUP_RCLONE_CONF sync $BACKUP_DIR $REMOTE$BACKUP_RCLONE_DEST
+  # Sync with rclone
+  REMOTE=$(rclone --config $BACKUP_RCLONE_CONF listremotes | head -n 1)
+  rclone --config $BACKUP_RCLONE_CONF sync $BACKUP_DIR $REMOTE$BACKUP_RCLONE_DEST
 
-  fi
+fi

@@ -1,3 +1,10 @@
 test
 .env
 mariadb_vol/
+vaultwarden/attachments/
+vaultwarden/icon_cache/
+vaultwarden/sends/
+vaultwarden/tmp/
+vaultwarden/db.*
+vaultwarden/rsa_*
+vaultwarden/*.log
