@@ -86,4 +86,6 @@ docker exec -it vaultwarden ash -c 'rclone config --config $BACKUP_RCLONE_CONF'
 Follow the prompts and instructions at https://rclone.org/remote_setup/ - you will most likely need to download a rclone on another computer (it is portable) to authorize.
 
 # Thanks to
+https://github.com/dani-garcia/vaultwarden
+
 https://github.com/dadatuputi/bitwarden_gcloud
